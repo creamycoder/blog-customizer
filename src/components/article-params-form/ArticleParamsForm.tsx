@@ -6,7 +6,7 @@ import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 
 import styles from './ArticleParamsForm.module.scss';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 
 import {
@@ -28,6 +28,7 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 	const [isOpened, setIsOpened] = useState(false);
 	const [formState, setFormState] =
 		useState<ArticleStateType>(defaultArticleState);
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	const handleToggle = () => {
 		setIsOpened((currentIsOpened) => !currentIsOpened);
@@ -45,8 +46,24 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 		setIsOpened(false);
 	};
 
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (
+				isOpened &&
+				containerRef.current &&
+				!containerRef.current.contains(e.target as Node)
+			) {
+				setIsOpened(false);
+			}
+		};
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [isOpened]);
+
 	return (
-		<>
+		<div ref={containerRef}>
 			<ArrowButton isOpen={isOpened} onClick={handleToggle} />
 			<aside
 				className={clsx(styles.container, {
@@ -122,6 +139,6 @@ export const ArticleParamsForm = (props: ArticleParamsFormProps) => {
 					</div>
 				</form>
 			</aside>
-		</>
+		</div>
 	);
 };
